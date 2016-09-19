@@ -1,0 +1,28 @@
+{
+  "name": "uw-lazy.js",
+  "version": "1.0.0",
+  "description": "Provides generator functions for standard react/redux development.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "bin": {
+    "lazy": "lazy.js",
+    "lazy-react": "lazy-react.js"
+  },
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "commander": "^2.9.0",
+    "fs-extra": "^0.30.0",
+    "mkdir-recursive": "^0.2.3"
+  },
+  "lazy": {
+    "react": {
+      "components": "tmp/components",
+      "redux": "tmp/components",
+      "pages": "tmp/components"
+    }
+  }
+}
