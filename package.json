@@ -16,7 +16,8 @@
     "chalk": "^1.1.3",
     "commander": "^2.9.0",
     "fs-extra": "^0.30.0",
-    "mkdir-recursive": "^0.2.3"
+    "mkdir-recursive": "^0.2.3",
+    "ucfirst": "^1.0.0"
   },
   "lazy": {
     "react": {
