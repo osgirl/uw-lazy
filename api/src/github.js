@@ -3,6 +3,7 @@ if (!process.env.GITHUB_TOKEN) {
 }
 
 const GitHubApi = require("github");
+const SimpleGit = require("simple-git");
 
 const github = new GitHubApi({
     debug: false,
@@ -43,29 +44,13 @@ github.repos.get({owner: 'utilitywarehouse', repo: name})
 })
 }
 
-var Git = require("nodegit");
-
-module.exports.init = function(path, origin, callback) {
-	Git.Repository.init(path, 0).then((repository) => {
-
-		Git.Remote.setUrl(repository, 'origin', origin);
-
-		return callback();
-	}).catch((err) => {
-		return callback(err)
-	});
-}
-
-module.exports.commit = function(root) {
-
-	Git.Index.open(index_path).then(function(index) {
-
-		index.addByPath(root).then((res) => {
-			console.log(res)
-		}).catch((err) => {
-			console.error(res);
-		})
-
-	});
-
+module.exports.push = function(path, origin, callback) {
+	SimpleGit(path)
+		.init()
+		.add('./*')
+		.commit('Initial commit')
+		.addRemote('origin', origin)
+		.push('origin', 'master', () => {
+			callback()
+		});
 }
