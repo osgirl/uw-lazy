@@ -1,0 +1,19 @@
+machine:
+  node:
+    version: 6.1.0
+  services:
+    - docker
+
+dependencies:
+  override:
+    - make install
+
+test:
+  override:
+    - make test
+
+deployment:
+  dev:
+    branch: master
+    commands:
+      - make ci-docker-build ci-kubernetes-push
