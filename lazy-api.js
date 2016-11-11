@@ -44,6 +44,8 @@ program
 
 			files.dockerignore('./api/templates/dockerignore'); output.ok('.dockerignore created');
 
+			files.dockerfile('./api/templates/Dockerfile'); output.ok('Dockfile created');
+
 			files.gitignore('./api/templates/gitignore'); output.ok('.gitignore created');
 
 			output.break();
