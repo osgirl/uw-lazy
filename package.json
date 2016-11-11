@@ -13,9 +13,12 @@
     "lazy-react": "lazy-react.js"
   },
   "dependencies": {
+    "boxen": "^0.8.1",
     "chalk": "^1.1.3",
     "commander": "^2.9.0",
+    "figures": "^2.0.0",
     "fs-extra": "^0.30.0",
+    "inquirer": "^1.2.2",
     "mkdir-recursive": "^0.2.3",
     "ucfirst": "^1.0.0"
   },
