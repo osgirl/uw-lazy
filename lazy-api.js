@@ -6,15 +6,16 @@ const path = require('path');
 const files = require('./api/src/files');
 const interaction = require('./api/src/interaction');
 const github = require('./api/src/github');
+const circle = require('./api/src/circle');
 
 /**
  *  program execution
  */
 program
-  .version('0.0.1')
-  .arguments('<name> [directory]')
+	.version('0.0.1')
+	.arguments('<name> [directory]')
 	.usage('lazy api <name>')
-  .action(function(name, directory) {
+	.action(function(name, directory) {
 
 		if (!directory) {
 			directory = name;
@@ -53,23 +54,15 @@ program
 			output.write('Creating GitHub repository');
 
 			github.create(name, (repoUrl) => {
-					output.write('Initialising local repository');
+				output.write('Preparing local repository');
 
-					github.init(projectPath, repoUrl, (err) => {
+				github.push(projectPath, repoUrl, () => {
+					output.write('repository prepared');
+					output.write('Registering keys with Circle CI');
 
-						if (err) {
-							output.die(err);
-						}
-
-						output.break();
-						output.ok('repository created');
-
-						output.write('Creating intial commit');
-
-						github.commit(projectPath);
-
-					});
+					circle.setup(name, () => {});
+				});
 			});
 		});
-  })
-  .parse(process.argv);
+	})
+	.parse(process.argv);
