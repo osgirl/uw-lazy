@@ -32,8 +32,8 @@ module.exports.package = function(source, defaults = {}, previous = {}, callback
 
 module.exports.runtime = function(defaults, callback) {
 
-	const node = defaults.runtime && defaults.runtime.NODE_PORT ? defaults.runtime.NODE_PORT : Math.floor(Math.random() * (7500 - 6500 + 1)) + 6500;
-	const docker = defaults.runtime && defaults.runtime.DOCKER_PORT ? defaults.runtime.DOCKER_PORT : node + 1;
+	const node = defaults.NODE_PORT ? defaults.NODE_PORT : Math.floor(Math.random() * (7500 - 6500 + 1)) + 6500;
+	const docker = defaults.DOCKER_PORT ? defaults.DOCKER_PORT : node + 1;
 
 	if (!enabled) {
 		return callback({NODE_PORT: node, DOCKER_PORT: docker});
@@ -48,15 +48,29 @@ module.exports.runtime = function(defaults, callback) {
 
 }
 
-module.exports.circleNotification = function(defaults, callback) {
+module.exports.circle = function(defaults, callback) {
 	const hookUrlDefault = defaults.circle ? defaults.circle.hookUrl : undefined;
+	const dockerId = defaults.circle && defaults.circle.dockerId ? defaults.circle.dockerId : process.env.DOCKER_ID;
+	const dockerEmail = defaults.circle && defaults.circle.dockerEmail ? defaults.circle.dockerEmail : process.env.DOCKER_EMAIL;
+	const dockerPassword = defaults.circle && defaults.circle.dockerPassword ? defaults.circle.dockerPassword : process.env.DOCKER_PASSWORD;
+	const k8sDevToken = defaults.circle && defaults.circle.k8sDevToken ? defaults.circle.k8sDevToken : undefined;
 
 	if (!enabled) {
-		return callback({circle: {hookUrl: hookUrlDefault}});
+		return callback({circle: {
+			hookUrl: hookUrlDefault,
+			dockerId,
+			dockerEmail,
+			dockerPassword,
+			k8sDevToken
+		}});
 	}
 
 	inquirer.prompt([
-		{type: 'input', name: 'hookUrl', message: 'Slack Hook URL', default: hookUrlDefault }
+		{type: 'input', name: 'hookUrl', message: 'Slack Hook URL', default: hookUrlDefault },
+		{type: 'input', name: 'dockerId', message: 'Docker ID', default: dockerId },
+		{type: 'input', name: 'dockerEmail', message: 'Docker Email', default: dockerEmail },
+		{type: 'input', name: 'dockerPassword', message: 'Docker Password', default: dockerPassword },
+		{type: 'input', name: 'k8sDevToken', message: 'Kubernetes deploy token (dev)', default: k8sDevToken }
 	]).then(function (answers) {
     callback({circle: answers});
 	});

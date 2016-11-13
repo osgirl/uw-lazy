@@ -44,12 +44,40 @@ function addNotification(name, hookUrl, callback) {
 	fetch('PUT', `/project/github/utilitywarehouse/${name}/settings`, payload, callback);
 }
 
+function environment(name, config, callback) {
+	const payload = {
+		name: 'DOCKER_ID',
+		value: config.dockerId
+	};
+	fetch('POST', `/project/github/utilitywarehouse/${name}/envvar`, payload, (a,b,c) => {
+		const payload = {
+			name: 'DOCKER_EMAIL',
+			value: config.dockerEmail
+		};
+		fetch('POST', `/project/github/utilitywarehouse/${name}/envvar`, payload, () => {
+			const payload = {
+				name: 'DOCKER_PASSWORD',
+				value: config.dockerPassword
+			};
+			fetch('POST', `/project/github/utilitywarehouse/${name}/envvar`, payload, () => {
+				const payload = {
+					name: 'K8S_DEV_TOKEN',
+					value: config.k8sDevToken
+				};
+				fetch('POST', `/project/github/utilitywarehouse/${name}/envvar`, payload, callback);
+			});
+		});
+	});
+}
+
 module.exports.setup = (name, config, callback) => {
 	registerKeys(name, () => {
 		addNotification(name, config.hookUrl, () => {
-			follow(name, () => {
-				build(name, () => {
-					callback();
+			environment(name, config, () => {
+				follow(name, () => {
+					build(name, () => {
+						callback();
+					});
 				});
 			});
 		});

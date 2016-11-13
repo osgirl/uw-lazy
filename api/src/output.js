@@ -42,3 +42,12 @@ module.exports.warn = function(str) {
 module.exports.error = function(...str) {
 	console.log('    ', chalk.red(figures.cross), '    ', ...str);
 }
+
+module.exports.caveats = function(projectPath) {
+	console.log(boxen(`          CAVEATS          `, {padding: 1, margin: 1, borderStyle: 'double'}));
+	console.log('Some secrets have been saved in \n\n\r\t%s\n\n\rMake sure to deal with it!', chalk.green(projectPath + '/node_modules/.lazy.json'));
+}
+
+module.exports.bye = function() {
+	console.log('Utility Warehouse Web Systems Team thanks you for being lazy, so long!')
+}

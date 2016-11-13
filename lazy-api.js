@@ -44,7 +44,6 @@ program
 		let inputSettings = files.restoreValues();
 
 		interaction.package(require('./api/templates/package.json'), _.merge({name, author: 'web-systems@utilitywarehouse.co.uk'}), inputSettings, (result) => {
-
 			inputSettings = _.merge(inputSettings, result);
 
 			files.package(result); output.break(); output.ok('package.json created');
@@ -53,7 +52,6 @@ program
 			output.write('Building Makefile:');
 
 			interaction.runtime(inputSettings, (result) => {
-
 				inputSettings = _.merge(inputSettings, result);
 				output.break();
 
@@ -86,14 +84,14 @@ program
 
 						output.write('Preparing Circle CI');
 
-						output.break();
-
-						files.circle('./api/templates/circle.yml'); output.ok('circle.yml created');
-
-						interaction.circleNotification(inputSettings, (result) => {
+						interaction.circle(inputSettings, (result) => {
 							inputSettings = _.merge(inputSettings, result);
 
 							files.cache(inputSettings);
+
+							output.break();
+
+							files.circle('./api/templates/circle.yml'); output.ok('circle.yml created');
 
 							circle.setup(name, inputSettings.circle, () => {
 								output.ok('project registered');
@@ -115,6 +113,14 @@ program
 									} else {
 										output.ok('DockerHub repository created');
 									}
+									output.break();
+
+									output.caveats(projectPath);
+
+									output.break();
+
+									output.bye();
+
 									output.break();
 								});
 							});
