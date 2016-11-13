@@ -10,7 +10,7 @@ function fetch(method, path, payload, callback) {
 		url: baseUrl + path,
 		qs: {'circle-token': process.env.CIRCLE_TOKEN},
 		method: method,
-		headers: {'Content-Type': 'application/json'},
+		headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
 		json: payload
 	}, callback);
 }
@@ -20,7 +20,13 @@ function registerKeys(name, callback) {
 		type: 'deploy-key'
 	};
 
-	fetch('POST', `/project/github/utilitywarehouse/${name}/checkout-key`, payload, callback);
+	fetch('GET', `/project/github/utilitywarehouse/${name}/checkout-key`, null, function(err, res, body) {
+		const keys = JSON.parse(body)
+		if (keys && keys[0] && keys[0].type === 'deploy-key') {
+			return callback();
+		}
+		fetch('POST', `/project/github/utilitywarehouse/${name}/checkout-key`, payload, callback);
+	})
 }
 
 function follow(name, callback) {
@@ -31,12 +37,25 @@ function build(name, callback) {
 	fetch('POST', `/project/github/utilitywarehouse/${name}/tree/master`, null, callback);
 }
 
-module.exports.setup = (name, callback) => {
+function addNotification(name, hookUrl, callback) {
+	const payload = {
+		slack_webhook_url: hookUrl
+	};
+	fetch('PUT', `/project/github/utilitywarehouse/${name}/settings`, payload, callback);
+}
+
+module.exports.setup = (name, config, callback) => {
 	registerKeys(name, () => {
-		follow(name, () => {
-			build(name, () => {
-				callback();
+		addNotification(name, config.hookUrl, () => {
+			follow(name, () => {
+				build(name, () => {
+					callback();
+				});
 			});
 		});
 	});
 };
+
+//curl -X POST --header "Content-Type: application/json" -d '{"slack_webhook_url":"hook url"}' https://circleci.com/api/v1.1/project/github/utilitywarehouse/uw-service-partner-network/settings?circle-token=:token
+
+//curl -X POST --header "Content-Type: application/json" -d '{"name":"foo", "value":"bar"}' https://circleci.com/api/v1.1/project/:vcs-type/:username/:project/envvar?circle-token=:token

@@ -34,3 +34,11 @@ module.exports.die = function(str) {
 	console.error(str);
 	process.exit(1);
 }
+
+module.exports.warn = function(str) {
+	console.log('    ', chalk.yellow(figures.warning), '    ', str);
+}
+
+module.exports.error = function(...str) {
+	console.log('    ', chalk.red(figures.cross), '    ', ...str);
+}

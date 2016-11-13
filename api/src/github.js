@@ -2,6 +2,8 @@ if (!process.env.GITHUB_TOKEN) {
 	throw "process.env.GITHUB_TOKEN required";
 }
 
+const output = require('./output');
+
 const GitHubApi = require("github");
 const SimpleGit = require("simple-git");
 
@@ -45,12 +47,19 @@ github.repos.get({owner: 'utilitywarehouse', repo: name})
 }
 
 module.exports.push = function(path, origin, callback) {
+
 	SimpleGit(path)
+		.silent(true)
 		.init()
 		.add('./*')
 		.commit('Initial commit')
-		.addRemote('origin', origin)
-		.push('origin', 'master', () => {
-			callback()
+		.addRemote('origin', origin, (err) => {
+			return callback(false);
+		})
+		.push('origin', 'master', {}, (err) => {
+			if (err) {
+				throw err;
+			}
+			callback(true);
 		});
 }
