@@ -11,6 +11,7 @@
     "express": "^4.14.0",
     "jsonwebtoken": "^7.1.9",
     "systemic": "^0.6.0",
+    "uw-lib-auth.js": "github:utilitywarehouse/uw-lib-auth.js",
     "uw-lib-prometheus.js": "^1.0.0"
   },
   "devDependencies": {
