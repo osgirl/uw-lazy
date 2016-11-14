@@ -61,6 +61,11 @@ program
 
 				output.write('Preparing git repository');
 
+				files.dockerignore('./api/templates/dockerignore'); output.ok('.dockerignore created');
+				files.dockerfile('./api/templates/Dockerfile'); output.ok('Dockerfile created');
+				files.gitignore('./api/templates/gitignore'); output.ok('.gitignore created');
+				files.circle('./api/templates/circle.yml'); output.ok('circle.yml created');
+
 				output.break();
 
 				github.create(name, (repoUrl, created) => {
@@ -78,8 +83,6 @@ program
 							output.warn('remote already added, skipping push');
 						}
 
-						files.gitignore('./api/templates/gitignore'); output.ok('.gitignore created');
-
 						output.break();
 
 						output.write('Preparing Circle CI');
@@ -91,8 +94,6 @@ program
 
 							output.break();
 
-							files.circle('./api/templates/circle.yml'); output.ok('circle.yml created');
-
 							circle.setup(name, inputSettings.circle, () => {
 								output.ok('project registered');
 								output.ok('build requested');
@@ -102,10 +103,6 @@ program
 								output.write('Preparing Docker');
 
 								output.break();
-
-								files.dockerignore('./api/templates/dockerignore'); output.ok('.dockerignore created');
-
-								files.dockerfile('./api/templates/Dockerfile'); output.ok('Dockerfile created');
 
 								docker.createRepository(name, (err) => {
 									if (err) {
