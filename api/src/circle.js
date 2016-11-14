@@ -1,5 +1,5 @@
 if (!process.env.CIRCLE_TOKEN) {
-	throw "process.env.CIRCLE_TOKEN required";
+	throw 'process.env.CIRCLE_TOKEN required';
 }
 
 const baseUrl = 'https://circleci.com/api/v1.1';

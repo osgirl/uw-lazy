@@ -26,7 +26,7 @@ module.exports.package = function(source, defaults = {}, previous = {}, callback
 
 	inquirer.prompt(questions).then(function (answers) {
 		const packageDescription = _.merge(source, answers);
-    callback(packageDescription);
+		callback(packageDescription);
 	});
 }
 
@@ -43,7 +43,7 @@ module.exports.runtime = function(defaults, callback) {
 		{type: 'input', name: 'NODE_PORT', message: 'NODE_PORT', default: node, },
 		{type: 'input', name: 'DOCKER_PORT', message: 'DOCKER_PORT', default: docker},
 	]).then(function (answers) {
-    callback(answers);
+		callback(answers);
 	});
 
 }
@@ -72,6 +72,6 @@ module.exports.circle = function(defaults, callback) {
 		{type: 'input', name: 'dockerPassword', message: 'Docker Password', default: dockerPassword },
 		{type: 'input', name: 'k8sDevToken', message: 'Kubernetes deploy token (dev)', default: k8sDevToken }
 	]).then(function (answers) {
-    callback({circle: answers});
+		callback({circle: answers});
 	});
 };

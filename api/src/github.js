@@ -1,28 +1,28 @@
 if (!process.env.GITHUB_TOKEN) {
-	throw "process.env.GITHUB_TOKEN required";
+	throw 'process.env.GITHUB_TOKEN required';
 }
 
 const output = require('./output');
 
-const GitHubApi = require("github");
-const SimpleGit = require("simple-git");
+const GitHubApi = require('github');
+const SimpleGit = require('simple-git');
 
 const github = new GitHubApi({
-    debug: false,
-    protocol: "https",
-    host: "api.github.com", // should be api.github.com for GitHub
-    pathPrefix: null, // for some GHEs; none for GitHub
-    headers: {
-        "user-agent": "UW Lazy API" // GitHub is happy with a unique user agent
-    },
-    followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
-    timeout: 5000
+	debug: false,
+	protocol: 'https',
+	host: 'api.github.com', // should be api.github.com for GitHub
+	pathPrefix: null, // for some GHEs; none for GitHub
+	headers: {
+		'user-agent': 'UW Lazy API' // GitHub is happy with a unique user agent
+	},
+	followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
+	timeout: 5000
 });
 
 // user token
 github.authenticate({
-    type: "token",
-    token: process.env.GITHUB_TOKEN
+	type: 'token',
+	token: process.env.GITHUB_TOKEN
 });
 
 module.exports.create = function(name, callback) {
