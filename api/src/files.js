@@ -1,6 +1,9 @@
 const fs = require('fs-extra');
 const _ = require('lodash');
 const path = require('path');
+const dot = require('dot');
+
+dot.templateSettings.strip = false;
 
 let root;
 
@@ -29,8 +32,11 @@ module.exports.circle = function(source) {
 	fs.copySync(source, path.join(root, 'circle.yml'));
 }
 
-module.exports.makefile = function(source) {
-	fs.copySync(source, path.join(root, 'Makefile'));
+
+module.exports.makefile = function(source, variables) {
+
+	const template = dot.template(fs.readFileSync(source));
+	fs.writeFileSync(path.join(root, 'Makefile'), template(variables));
 }
 
 module.exports.gitignore = function(source) {
@@ -43,4 +49,15 @@ module.exports.dockerignore = function(source) {
 
 module.exports.dockerfile = function(source) {
 	fs.copySync(source, path.join(root, 'Dockerfile'));
+}
+
+module.exports.cache = function(values) {
+	fs.writeJsonSync(path.join(root, 'node_modules/.lazy.json'), values)
+}
+
+module.exports.restoreValues = function() {
+	if (fs.existsSync(path.join(root, 'node_modules/.lazy.json'))) {
+		return require(path.join(root, 'node_modules/.lazy.json'));
+	}
+	return {};
 }

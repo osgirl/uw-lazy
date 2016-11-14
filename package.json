@@ -13,15 +13,18 @@
     "lazy-react": "lazy-react.js"
   },
   "dependencies": {
+    "axios": "^0.15.2",
+    "bluebird": "^3.4.6",
     "boxen": "^0.8.1",
     "chalk": "^1.1.3",
     "commander": "^2.9.0",
+    "docker-hub-api": "github:michael-donat/Docker-Hub-API",
+    "dot": "^1.1.1",
     "figures": "^2.0.0",
     "fs-extra": "^0.30.0",
     "github": "^6.0.4",
     "inquirer": "^1.2.2",
     "mkdir-recursive": "^0.2.3",
-    "request": "^2.78.0",
     "simple-git": "^1.62.0",
     "ucfirst": "^1.0.0"
   },

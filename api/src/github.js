@@ -1,26 +1,28 @@
 if (!process.env.GITHUB_TOKEN) {
-	throw "process.env.GITHUB_TOKEN required";
+	throw 'process.env.GITHUB_TOKEN required';
 }
 
-const GitHubApi = require("github");
-const SimpleGit = require("simple-git");
+const output = require('./output');
+
+const GitHubApi = require('github');
+const SimpleGit = require('simple-git');
 
 const github = new GitHubApi({
-    debug: false,
-    protocol: "https",
-    host: "api.github.com", // should be api.github.com for GitHub
-    pathPrefix: null, // for some GHEs; none for GitHub
-    headers: {
-        "user-agent": "UW Lazy API" // GitHub is happy with a unique user agent
-    },
-    followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
-    timeout: 5000
+	debug: false,
+	protocol: 'https',
+	host: 'api.github.com', // should be api.github.com for GitHub
+	pathPrefix: null, // for some GHEs; none for GitHub
+	headers: {
+		'user-agent': 'UW Lazy API' // GitHub is happy with a unique user agent
+	},
+	followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
+	timeout: 5000
 });
 
 // user token
 github.authenticate({
-    type: "token",
-    token: process.env.GITHUB_TOKEN
+	type: 'token',
+	token: process.env.GITHUB_TOKEN
 });
 
 module.exports.create = function(name, callback) {
@@ -45,12 +47,19 @@ github.repos.get({owner: 'utilitywarehouse', repo: name})
 }
 
 module.exports.push = function(path, origin, callback) {
+
 	SimpleGit(path)
+		.silent(true)
 		.init()
 		.add('./*')
 		.commit('Initial commit')
-		.addRemote('origin', origin)
-		.push('origin', 'master', () => {
-			callback()
+		.addRemote('origin', origin, (err) => {
+			return callback(false);
+		})
+		.push('origin', 'master', {}, (err) => {
+			if (err) {
+				throw err;
+			}
+			callback(true);
 		});
 }
