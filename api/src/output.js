@@ -30,8 +30,8 @@ module.exports.ok = function(str) {
 	console.log('    ', chalk.green(figures.tick), '    ', str);
 }
 
-module.exports.die = function(str) {
-	console.error(str);
+module.exports.die = function(...str) {
+	console.error(chalk.red('Fatal error: '), ...str);
 	process.exit(1);
 }
 

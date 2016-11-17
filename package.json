@@ -10,7 +10,8 @@
   "license": "ISC",
   "bin": {
     "lazy": "lazy.js",
-    "lazy-react": "lazy-react.js"
+    "lazy-react": "lazy-react.js",
+    "lazy-api": "lazy-api.js"
   },
   "dependencies": {
     "axios": "^0.15.2",

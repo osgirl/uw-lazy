@@ -10,6 +10,10 @@ const circle = require('./api/src/circle');
 const docker = require('./api/src/docker');
 const _ = require('lodash');
 
+process.on('unhandledRejection', function(reason, p){
+    output.die(reason);
+});
+
 /**
  *  program execution
  */
@@ -33,7 +37,7 @@ program
 		output.break();
 
 		files.root(projectPath);
-		files.structure(projectPath, require('./api/templates/structure.json'));
+		files.structure(projectPath, require(files.path('structure.json')));
 
 		output.ok('directories created');
 
@@ -43,7 +47,7 @@ program
 
 		let inputSettings = files.restoreValues();
 
-		interaction.package(require('./api/templates/package.json'), _.merge({name, author: 'web-systems@utilitywarehouse.co.uk'}), inputSettings, (result) => {
+		interaction.package(require(files.path('package.json')), _.merge({name, author: 'web-systems@utilitywarehouse.co.uk'}), inputSettings, (result) => {
 			inputSettings = _.merge(inputSettings, result);
 
 			files.package(result); output.break(); output.ok('package.json created');
@@ -55,16 +59,16 @@ program
 				inputSettings = _.merge(inputSettings, result);
 				output.break();
 
-				files.makefile('./api/templates/Makefile', inputSettings); output.ok('Makefile created');
+				files.makefile(files.path('Makefile'), inputSettings); output.ok('Makefile created');
 
 				output.break();
 
 				output.write('Preparing git repository');
 
-				files.dockerignore('./api/templates/dockerignore'); output.ok('.dockerignore created');
-				files.dockerfile('./api/templates/Dockerfile'); output.ok('Dockerfile created');
-				files.gitignore('./api/templates/gitignore'); output.ok('.gitignore created');
-				files.circle('./api/templates/circle.yml'); output.ok('circle.yml created');
+				files.dockerignore(files.path('dockerignore')); output.ok('.dockerignore created');
+				files.dockerfile(files.path('Dockerfile')); output.ok('Dockerfile created');
+				files.gitignore(files.path('gitignore')); output.ok('.gitignore created');
+				files.circle(files.path('circle.yml')); output.ok('circle.yml created');
 
 				output.break();
 

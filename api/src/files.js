@@ -3,6 +3,8 @@ const _ = require('lodash');
 const path = require('path');
 const dot = require('dot');
 
+const fileSource = path.join(__dirname, '../templates');
+
 dot.templateSettings.strip = false;
 
 let root;
@@ -10,6 +12,10 @@ let root;
 module.exports.root = function(projectPath) {
 	root = projectPath;
 	fs.mkdirsSync(projectPath);
+}
+
+module.exports.path = function(file) {
+	return path.join(fileSource, file);
 }
 
 module.exports.structure = function structure(root, directories) {
@@ -34,7 +40,6 @@ module.exports.circle = function(source) {
 
 
 module.exports.makefile = function(source, variables) {
-
 	const template = dot.template(fs.readFileSync(source));
 	fs.writeFileSync(path.join(root, 'Makefile'), template(variables));
 }
