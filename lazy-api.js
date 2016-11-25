@@ -27,13 +27,13 @@ program
 	.option('--no-makefile', 'skip generation of Makefile')
 	.option('--no-git', 'skin creation of git repository')
 	.option('--no-circle', 'skin circle provisioning')
-	.option('--no-docker', 'skip docker registry setup')
+	.option('--no-docker', 'skip docker setup')
 	.option('--structure-only', 'only file structure')
 	.option('--package-only', 'only generation of package json')
 	.option('--makefile-only', 'only generation of Makefile')
 	.option('--git-only', 'only creation of git repository')
 	.option('--circle-only', 'only circle provisioning')
-	.option('--docker-only', 'only docker registry setup')
+	.option('--docker-only', 'only docker setup')
 	.action(function(name, directory) {
 
 		if (!directory) {
@@ -136,14 +136,7 @@ program
 			files.dockerignore(files.path('dockerignore')); output.ok('.dockerignore created');
 			files.dockerfile(files.path('Dockerfile')); output.ok('Dockerfile created');
 
-			docker.createRepository(name, (err) => {
-				if (err) {
-					output.error('Failed to create docker hub repository.', err);
-				} else {
-					output.ok('DockerHub repository created');
-				}
-				next(inputSettings);
-			});
+			next(inputSettings);
 		}
 
 		const finishFunction = () => {
