@@ -25,7 +25,7 @@ program
 	.option('--no-package', 'skip generation of package json')
 	.option('--no-makefile', 'skip generation of Makefile')
 	.option('--no-git', 'skin creation of git repository')
-	.option('--no-circle', 'skin circle provisioning')
+	.option('--no-circle', 'skip circle provisioning')
 	.option('--no-docker', 'skip docker setup')
 	.option('--structure-only', 'only file structure')
 	.option('--package-only', 'only generation of package json')
@@ -33,6 +33,8 @@ program
 	.option('--git-only', 'only creation of git repository')
 	.option('--circle-only', 'only circle provisioning')
 	.option('--docker-only', 'only docker setup')
+	.option('--ns <ns>', 'namespace (kube + registry)')
+	.option('--description <description>', 'project description')
 	.action(function(name, directory) {
 
 		if (!directory) {
@@ -49,6 +51,13 @@ program
 		files.root(projectPath);
 
 		let inputValues = files.restoreValues();
+
+		const basicInfoFunction = (inputSettings, next) => {
+			interaction.info(_.merge({name, ns: program.ns, description: program.description}, inputSettings), (result) => {
+				inputSettings = _.merge(inputValues, result);
+				next(inputSettings);
+			});
+		};
 
 		const structureFunction = (inputSettings, next) => {
 
@@ -175,6 +184,7 @@ program
 		if (program.circleOnly) execStack = [circleFunction];
 		if (program.dockerOnly) execStack = [dockerFunction];
 
+		execStack.unshift(basicInfoFunction);
 		execStack.push(finishFunction);
 
 		run(inputValues, execStack.shift());

@@ -8,6 +8,8 @@ dependencies:
   override:
     - npm install -g yarn
     - make install
+  cache_directories:
+    - "~/.yarn-cache"
 
 test:
   override:

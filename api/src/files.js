@@ -57,12 +57,12 @@ module.exports.dockerfile = function(source) {
 }
 
 module.exports.cache = function(values) {
-	fs.writeJsonSync(path.join(root, 'node_modules/.lazy.json'), values)
+	fs.writeJsonSync(path.join(root, '.lazy.json'), values)
 }
 
 module.exports.restoreValues = function() {
-	if (fs.existsSync(path.join(root, 'node_modules/.lazy.json'))) {
-		return require(path.join(root, 'node_modules/.lazy.json'));
+	if (fs.existsSync(path.join(root, '.lazy.json'))) {
+		return require(path.join(root, '.lazy.json'));
 	}
 	return {};
 }

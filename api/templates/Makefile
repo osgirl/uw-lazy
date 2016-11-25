@@ -6,7 +6,8 @@ export SHELL = /bin/bash
 NODE_PORT:={{=it.NODE_PORT}}
 DOCKER_PORT:={{=it.DOCKER_PORT}}
 DOCKER_REGISTRY=registry.uw.systems
-DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/{{=it.ns}}/{{=it.name}}
+NAMESPACE={{=it.ns}}
+DOCKER_REPOSITORY=$(DOCKER_REGISTRY)/${NAMESPACE}/{{=it.name}}
 DOCKER_CONTAINER_NAME={{=it.name}}
 
 help:
@@ -51,4 +52,8 @@ ci-docker-build: ci-docker-auth
 	docker tag $(DOCKER_REPOSITORY):$(CIRCLE_SHA1) $(DOCKER_REPOSITORY):latest
 	docker push $(DOCKER_REPOSITORY)
 
-ci-kubernetes-push: bypass
+K8S_URL=https://elb.master.k8s.dev.uw.systems/apis/extensions/v1beta1/namespaces/$(NAMESPACE)/deployments/$(DOCKER_CONTAINER_NAME)
+K8S_PAYLOAD={"spec":{"template":{"spec":{"containers":[{"name":"$(DOCKER_CONTAINER_NAME)","image":"$(DOCKER_REPOSITORY):$(CIRCLE_SHA1)"}]}}}}
+
+ci-kubernetes-push:
+	test "$(shell curl -o /dev/null -w '%{http_code}' -s -X PATCH -k -d '$(K8S_PAYLOAD)' -H 'Content-Type: application/strategic-merge-patch+json' -H 'Authorization: Bearer $(K8S_DEV_TOKEN)' '$(K8S_URL)')" -eq "200"

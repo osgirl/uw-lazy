@@ -7,6 +7,37 @@ module.exports.enable = function(enable) {
 	enabled = enable;
 }
 
+module.exports.info = function(defaults = {}, callback) {
+	if (!enabled) { //pick default answers
+
+		if (!defaults.name) {
+			throw 'Cannot run non-interactively without a name';
+		}
+
+		if (!defaults.ns) {
+			throw 'Cannot run non-interactively without a namespace';
+		}
+
+		if (!defaults.description) {
+			throw 'Cannot run non-interactively without a description';
+		}
+
+		return callback(defaults);
+	}
+
+	const name = defaults.name ? defaults.name : undefined;
+	const ns = defaults.ns ? defaults.ns : undefined;
+	const description = defaults.description ? defaults.description : undefined;
+
+	inquirer.prompt([
+		{type: 'input', name: 'name', message: 'name', default: name, },
+		{type: 'input', name: 'ns', message: 'namespace', default: ns},
+		{type: 'input', name: 'description', message: 'description', default: description},
+	]).then(function (answers) {
+		callback(answers);
+	});
+}
+
 module.exports.package = function(source, defaults = {}, previous = {}, callback) {
 
 	function getDefault(key) {
