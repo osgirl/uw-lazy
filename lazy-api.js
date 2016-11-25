@@ -10,7 +10,7 @@ const circle = require('./api/src/circle');
 const docker = require('./api/src/docker');
 const _ = require('lodash');
 
-process.on('unhandledRejection', function(reason, p){
+process.on('unhandledRejection', function(reason, p) {
     output.die(reason);
 });
 
@@ -22,37 +22,57 @@ program
 	.arguments('<name> [directory]')
 	.usage('lazy api <name>')
 	.option('--no-interaction', `don't ask questions`)
+	.option('--no-structure', 'skin file structure')
+	.option('--no-package', 'skip generation of package json')
+	.option('--no-makefile', 'skip generation of Makefile')
+	.option('--no-git', 'skin creation of git repository')
+	.option('--no-circle', 'skin circle provisioning')
+	.option('--no-docker', 'skip docker registry setup')
+	.option('--structure-only', 'only file structure')
+	.option('--package-only', 'only generation of package json')
+	.option('--makefile-only', 'only generation of Makefile')
+	.option('--git-only', 'only creation of git repository')
+	.option('--circle-only', 'only circle provisioning')
+	.option('--docker-only', 'only docker registry setup')
 	.action(function(name, directory) {
 
 		if (!directory) {
 			directory = name;
 		}
-
 		interaction.enable(program.interaction);
 
 		const projectPath = path.resolve(directory);
 
 		output.header(program);
-		output.write('Creating project %s in %s', output.em(name), output.arg(projectPath));
+		output.write('Lazying project %s in %s', output.em(name), output.arg(projectPath));
 		output.break();
 
 		files.root(projectPath);
-		files.structure(projectPath, require(files.path('structure.json')));
 
-		output.ok('directories created');
+		let inputValues = files.restoreValues();
 
-		output.break();
+		const structureFunction = (inputSettings, next) => {
 
-		output.write('Building package.json:');
+			files.structure(projectPath, require(files.path('structure.json')));
 
-		let inputSettings = files.restoreValues();
+			output.ok('directories created');
 
-		interaction.package(require(files.path('package.json')), _.merge({name, author: 'web-systems@utilitywarehouse.co.uk'}), inputSettings, (result) => {
-			inputSettings = _.merge(inputSettings, result);
+			next(inputSettings);
+		}
 
-			files.package(result); output.break(); output.ok('package.json created');
+		const packageFunction = (inputSettings, next) => {
+			output.write('Building package.json:');
 
-			output.break();
+			interaction.package(require(files.path('package.json')), _.merge({name, author: 'web-systems@utilitywarehouse.co.uk'}), inputSettings, (result) => {
+				inputSettings = _.merge(inputValues, result);
+
+				files.package(result); output.break(); output.ok('package.json created');
+
+				next(inputSettings);
+			});
+		}
+
+		const makefileFunction = (inputSettings, next) => {
 			output.write('Building Makefile:');
 
 			interaction.runtime(inputSettings, (result) => {
@@ -61,74 +81,112 @@ program
 
 				files.makefile(files.path('Makefile'), inputSettings); output.ok('Makefile created');
 
-				output.break();
+				next(inputSettings);
+			})
+		}
 
-				output.write('Preparing git repository');
+		const gitFunction = (inputSettings, next) => {
+			output.write('Preparing git repository');
 
-				files.dockerignore(files.path('dockerignore')); output.ok('.dockerignore created');
-				files.dockerfile(files.path('Dockerfile')); output.ok('Dockerfile created');
-				files.gitignore(files.path('gitignore')); output.ok('.gitignore created');
-				files.circle(files.path('circle.yml')); output.ok('circle.yml created');
+			files.gitignore(files.path('gitignore')); output.ok('.gitignore created');
 
-				output.break();
+			output.break();
 
-				github.create(name, (repoUrl, created) => {
-					if (created) {
-						output.ok('remote created');
+			github.create(name, inputSettings.description, (repoUrl, created) => {
+				if (created) {
+					output.ok('remote created');
+				} else {
+					output.warn('remote already exists, skipping creation');
+				}
+
+				github.push(projectPath, repoUrl, (pushed) => {
+					if (pushed) {
+						output.ok('local prepared');
+						output.ok('init code pushed');
 					} else {
-						output.warn('remote already exists, skipping creation');
+						output.warn('remote already added, skipping push');
 					}
 
-					github.push(projectPath, repoUrl, (pushed) => {
-						if (pushed) {
-							output.ok('local prepared');
-							output.ok('init code pushed');
-						} else {
-							output.warn('remote already added, skipping push');
-						}
+					next(inputSettings);
+				})
+			})
+		}
 
-						output.break();
+		const circleFunction = (inputSettings, next) => {
+			output.write('Preparing Circle CI');
+			files.circle(files.path('circle.yml')); output.ok('circle.yml created');
 
-						output.write('Preparing Circle CI');
+			interaction.circle(inputSettings, (result) => {
+				inputSettings = _.merge(inputSettings, result);
 
-						interaction.circle(inputSettings, (result) => {
-							inputSettings = _.merge(inputSettings, result);
+				output.break();
 
-							files.cache(inputSettings);
+				circle.setup(name, inputSettings.circle, () => {
+					output.ok('project registered');
+					output.ok('build requested');
 
-							output.break();
+					next(inputSettings);
+				})
+			})
+		}
 
-							circle.setup(name, inputSettings.circle, () => {
-								output.ok('project registered');
-								output.ok('build requested');
+		const dockerFunction = (inputSettings, next) => {
+			output.write('Preparing Docker');
 
-								output.break();
+			files.dockerignore(files.path('dockerignore')); output.ok('.dockerignore created');
+			files.dockerfile(files.path('Dockerfile')); output.ok('Dockerfile created');
 
-								output.write('Preparing Docker');
-
-								output.break();
-
-								docker.createRepository(name, (err) => {
-									if (err) {
-										output.error('Failed to create docker hub repository.', err);
-									} else {
-										output.ok('DockerHub repository created');
-									}
-									output.break();
-
-									output.caveats(projectPath);
-
-									output.break();
-
-									output.bye();
-
-									output.break();
-								});
-							});
-						});
-					});
-				});
+			docker.createRepository(name, (err) => {
+				if (err) {
+					output.error('Failed to create docker hub repository.', err);
+				} else {
+					output.ok('DockerHub repository created');
+				}
+				next(inputSettings);
 			});
-		});
+		}
+
+		const finishFunction = () => {
+			output.caveats(projectPath);
+
+			output.break();
+
+			output.bye();
+
+			output.break();
+		}
+
+		let execStack = [];
+
+		const run = (ins, fn) => {
+			fn(ins, (outs) => {
+
+				files.cache(outs);
+
+				const nextFn = execStack.shift();
+				if (!nextFn) return;
+				run(ins, nextFn);
+			})
+		}
+
+		if (program.structure) execStack.push(structureFunction);
+		if (program.package) execStack.push(packageFunction);
+		if (program.makefile) execStack.push(makefileFunction);
+		if (program.git) execStack.push(gitFunction);
+		if (program.circle) execStack.push(circleFunction);
+		if (program.docker) execStack.push(dockerFunction);
+
+		if (program.structureOnly) execStack = [structureFunction];
+		if (program.packageOnly) execStack = [packageFunction];
+		if (program.makefileOnly) execStack = [makefileFunction];
+		if (program.gitOnly) execStack = [gitFunction];
+		if (program.circleOnly) execStack = [circleFunction];
+		if (program.dockerOnly) execStack = [dockerFunction];
+
+		execStack.push(finishFunction);
+
+		run(inputValues, execStack.shift());
+
+
 	})
 	.parse(process.argv);

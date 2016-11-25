@@ -3,6 +3,5 @@
 .dockerignore
 .gitignore
 circle.yml
-node_modules/
 Dockerfile*
 README*

@@ -25,7 +25,7 @@ github.authenticate({
 	token: process.env.GITHUB_TOKEN
 });
 
-module.exports.create = function(name, callback) {
+module.exports.create = function(name, description, callback) {
 
 github.repos.get({owner: 'utilitywarehouse', repo: name})
 .then((repo) => {
@@ -37,7 +37,8 @@ github.repos.get({owner: 'utilitywarehouse', repo: name})
 	return github.repos.createForOrg({
 		org: 'utilitywarehouse',
 		name: name,
-		private: true
+		private: true,
+		description: description
 	}).then((repo)=>{
 		callback(repo.ssh_url);
 	}).catch((err) => {
