@@ -1,18 +1,10 @@
-FROM utilitywarehouse/alpine-node:v6
-
-RUN apk add --update nodejs git
-RUN npm install -g yarn
+FROM registry.uw.systems/base_images/uw-alpine-node:v7
 
 RUN mkdir -p /opt
 WORKDIR /opt
 
-COPY package.json /opt/
-COPY yarn.lock /opt/
-RUN yarn install --production
+ADD . /opt/
 
-ENV NODE_ENV=production
-ENV PORT=3000
 EXPOSE 3000
 
-COPY . /opt/
-CMD [ "node", "index.js" ]
+CMD ["node", "index.js"]
