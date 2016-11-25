@@ -7,7 +7,6 @@ const files = require('./api/src/files');
 const interaction = require('./api/src/interaction');
 const github = require('./api/src/github');
 const circle = require('./api/src/circle');
-const docker = require('./api/src/docker');
 const _ = require('lodash');
 
 process.on('unhandledRejection', function(reason, p) {
