@@ -41,7 +41,7 @@ docker-push: ## push docker image to repository
 	docker push $(DOCKER_REPOSITORY)
 
 docker-run: ## run docker image locally
-	docker -d -p $(DOCKER_PORT):3000 --name $(DOCKER_CONTAINER_NAME) $(DOCKER_REPOSITORY)
+	docker run -d -p $(DOCKER_PORT):3000 --name $(DOCKER_CONTAINER_NAME) $(DOCKER_REPOSITORY)
 
 # CIRCLE INTEGRATION
 ci-docker-auth:
